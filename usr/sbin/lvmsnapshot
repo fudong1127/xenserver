@@ -27,6 +27,7 @@
 # ver 0.4       (2013-03-29)
 #       - Added lvmsnapshot identifer switch
 #       - Added Remove snapshot if mounted or not
+#	- Added checksnapshot function
 #
 # ver 0.3       (2011-03-13)
 #       - Added snapshot/mount option for block volumes (KVM style)
@@ -69,6 +70,8 @@ CONFIGFILE="/etc/lvmsnapshot/lvmsnapshot.conf"
 # config file (either in the above location or by using the -c option)
 #=====================================================================
 
+# intialise volumemounted to false
+VOLUMEMOUNTED=false
 # Show debug output
 DEBUG=0
 
@@ -187,8 +190,22 @@ function checkvolume {
     if [ $? -ne 0  ]; then
         status_error "failed"
         error "Volume '$VOLUMEPATH' does not exist."
+
     else
         status_success "ok"
+	$VOLUMEMOUNTED = 0
+    fi
+}
+
+function checksnapshot {
+
+    $LVDISPLAY $@ > /dev/null 2>&1
+    if [ $? -ne 0  ]; then
+	status_error "failed"
+	return 1
+    else
+	status_success "ok"
+	return 0
     fi
 }
 
@@ -354,7 +371,7 @@ if [ ! -z $OPT_LVMEXTENSION ]; then
 fi
 
 if [ ! -z $OPT_IDENTIFIER ]; then
-    LVMEXTENSION=$OPT_IDENTIFIER
+    IDENTIFIER=$OPT_IDENTIFIER
 fi
 
 if [ ! -z $OPT_DEBUG ]; then
@@ -511,13 +528,17 @@ elif [ $1 = "remove" ]; then
         status_success "yes"
         outputne "Unmounting snapshot..."
         $UMOUNT $MOUNTPOINT > /dev/null 2>&1
-    
+    	cleanup
+    else
+	status_success "ok"
+	outputne  "Snapshot not mounted continuing..."
+	status_success "ok"
     fi
-
-    outputne "Checking snapshot..."
-    checkvolume $VOLUMEPATH
+    
+    outputne "Checking if snapshot exists... $SNAPSHOTPATH ..." 	
+    checksnapshot $SNAPSHOTPATH
     if [ $? -eq 0 ]; then
-        status_success "ok"
+        status_success "yes"
 
         if [[ $MODE == "block" ]]; then
             outputne "Unmapping snapshot partitions..."
@@ -531,7 +552,7 @@ elif [ $1 = "remove" ]; then
             fi
         fi
 
-        cleanup
+        
 
         outputne "Removing snapshot..."
         $LVREMOVE -f $SNAPSHOTPATH > /dev/null 2>&1
