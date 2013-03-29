@@ -54,7 +54,7 @@
 #=====================================================================
 
 ME=$(basename $0)
-ME_VERSION="0.3"
+ME_VERSION="0.4"
 
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
