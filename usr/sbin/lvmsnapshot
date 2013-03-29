@@ -27,7 +27,6 @@
 # ver 0.4       (2013-03-29)
 #       - Added lvmsnapshot identifer switch
 #       - Added Remove snapshot if mounted or not
-#	  
 #
 # ver 0.3       (2011-03-13)
 #       - Added snapshot/mount option for block volumes (KVM style)
