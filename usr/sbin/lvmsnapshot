@@ -24,6 +24,9 @@
 # Changelog
 #=====================================================================
 #
+# ver 0.5       (2013-03-29)
+#	- Added switch to  create snapshot without mounting
+#
 # ver 0.4       (2013-03-29)
 #       - Added lvmsnapshot identifer switch
 #       - Added Remove snapshot if mounted or not
@@ -54,7 +57,7 @@
 #=====================================================================
 
 ME=$(basename $0)
-ME_VERSION="0.4"
+ME_VERSION="0.5beta"
 
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -111,6 +114,9 @@ MAPPERINDEX=1
 # An identifier which will be appended to every snapshot
 # (make sure you set a value!)
 IDENTIFIER="-snapshot-lvmsnapshot"
+
+# Mount after create 
+MOUNTSNAP=true
 
 # Paths to needed commands
 LVDISPLAY=/sbin/lvdisplay
@@ -241,6 +247,7 @@ OPTIONS:
   -h                Show this help
   -i MAPPERINDEX    Mapper index when using block device mode
   -I		    LVM Snapshot identefier
+  -M 		    do not mount after snapshot created
   -m MODE           Mode to use, either block or partition
   -q                Be quiet
 
@@ -276,7 +283,7 @@ fi
 # Parse options
 #=====================================================================
 
-while getopts ':m:e:g:c:i:I:ndqh' OPTION ; do
+while getopts ':m:e:g:c:i:I:Mndqh' OPTION ; do
     case $OPTION in
         m)
             if [[ $OPTARG == "partition" || $OPTARG == "block" ]]; then
@@ -284,6 +291,9 @@ while getopts ':m:e:g:c:i:I:ndqh' OPTION ; do
             else
                 error "-m: invalid argument $OPTARG"
             fi
+            ;;
+	M)
+            OPT_MOUNTSNAP=false
             ;;
 
         g)
@@ -382,6 +392,10 @@ if [ ! -z $OPT_QUIET ]; then
     QUIET=$OPT_QUIET
 fi
 
+if [ ! -z $OPT_MOUNTSNAP ]; then
+    MOUNTSNAP=$OPT_MOUNTSNAP
+fi
+
 #=====================================================================
 # Parse parameters
 #=====================================================================
@@ -445,7 +459,11 @@ if [ $1 = "create" ]; then
     #=====================================================================
     # Create Snapshot
     #=====================================================================
+    outputne "Creating snapshot..."
+    status_success "ok"
+    $LVCREATE -L $SNAPSHOTSIZE -s -n $SNAPSHOTNAME $VOLUMEPATH > /dev/null 2>&1
 
+    if  $MOUNTSNAP ; then 
     outputne "Checking if mountpoint is mounted..."
 
     checkmount $MOUNTPOINT
@@ -455,9 +473,6 @@ if [ $1 = "create" ]; then
     else
         status_success "no"
     fi
-
-    outputne "Creating snapshot..."
-    $LVCREATE -L $SNAPSHOTSIZE -s -n $SNAPSHOTNAME $VOLUMEPATH > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
         status_success "ok"
@@ -514,6 +529,10 @@ if [ $1 = "create" ]; then
         status_error "failed"
         error "Error while creating snapshot."
     fi
+else
+	outputne "Mounted snapshot..."
+	status_success "no"
+fi
 
 elif [ $1 = "remove" ]; then
 
@@ -538,7 +557,7 @@ elif [ $1 = "remove" ]; then
     outputne "Checking if snapshot exists... $SNAPSHOTPATH ..." 	
     checksnapshot $SNAPSHOTPATH
     if [ $? -eq 0 ]; then
-        status_success "yes"
+        #status_success "yes"
 
         if [[ $MODE == "block" ]]; then
             outputne "Unmapping snapshot partitions..."
