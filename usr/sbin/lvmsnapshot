@@ -573,15 +573,6 @@ elif [ $1 = "remove" ]; then
             fi
         fi
 
-	outputne "lvmsnapshot: Remove snapshot devmapper links ...  $SNAPSHOTPATH ..."
-	#$DMSETUP remove $SNAPSHOTPATH > /dev/null 2>&1
-	#if [ $? -eq 0 ]; then
-        #    status_success "ok"
-        #else
-        #    status_error "failed"
-        #    error "lvmsnapshot: Error while removing snapshot using dmsetup, please remove manually. $DMSETUP remove $SNAPSHOTPATH ... "
-        #fi
-
         outputne "lvmsnapshot: Removing snapshot..."
         $LVREMOVE -f $SNAPSHOTPATH > /dev/null 2>&1
 
