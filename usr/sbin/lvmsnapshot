@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # LVM Snapshot & Mount Script
-# Version 0.5beta
+# Version 0.5
 
 # Copyright (c) 2011 Mathias Geat <mathias@ailoo.net>
 # with additions by Felix Moche <felix@moches.de>
@@ -24,7 +24,7 @@
 # Changelog
 #=====================================================================
 #
-# ver 0.5beta       (2013-03-29)
+# ver 0.5       (2013-03-30)
 #	- Added switch to  create snapshot without mounting
 #	- Added scriptname to log messages
 #
@@ -58,7 +58,7 @@
 #=====================================================================
 
 ME=$(basename $0)
-ME_VERSION="0.5beta"
+ME_VERSION="0.5"
 
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
