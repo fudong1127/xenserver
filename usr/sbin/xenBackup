@@ -62,7 +62,6 @@ cleanup()
 
    ${logDebug} "Removing snapshot ${xenDisk}${identifier}"
    ${lvmsnapshotExe} remove ${domain}  || { ${logCritical} "removal of snapshot  ${xenDisk}${identifier} failed"; exit 1; }
-   #${lvremoveExe} -f ${xenDisk}-snap || { ${logCritical} "removal of snapshot ${xenDisk}-snap failed"; exit 1; }
 }
 
 # function to print a usage message and bail
@@ -265,7 +264,7 @@ do
    fi
 
    # mount the xen snapshot read-only
-   ${logDebug} "Mounting ${xenDisk}-snap read-only"
+   ${logDebug} "Mounting ${xenDisk}${identifier} read-only"
    mount -r ${xenDisk}${identifier} ${mountPoint} || { ${logCritical} "mount failed, does mount point (${mountPoint}) exist?"; exit 1; }
 
    # do the backup according to the chosen backup engine
